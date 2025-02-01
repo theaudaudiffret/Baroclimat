@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 
 
-def makejob(commit_id, nruns):
+def makejob(commit_id, configpath, nruns):
     return f"""#!/bin/bash
 
 #SBATCH --job-name=binsegm
