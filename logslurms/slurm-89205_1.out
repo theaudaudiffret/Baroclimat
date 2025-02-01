@@ -1,0 +1,26 @@
+Session  89205_1
+Running on  sh05
+Copying the source directory and data
+Sat Feb  1 19:57:28 CET 2025
+Checking out the correct version of the code commit_id 1499de7cb483d24778e385c94d024ef22916537f
+Setting up the virtual environment
+Obtaining file:///tmp/sdim_34-89205/code
+Collecting pandas
+  Using cached pandas-2.2.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (13.1 MB)
+Collecting python-dateutil>=2.8.2
+  Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Collecting tzdata>=2022.7
+  Using cached tzdata-2025.1-py2.py3-none-any.whl (346 kB)
+Collecting pytz>=2020.1
+  Using cached pytz-2025.1-py2.py3-none-any.whl (507 kB)
+Collecting numpy>=1.22.4
+  Using cached numpy-2.2.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.4 MB)
+Collecting six>=1.5
+  Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+Successfully installed numpy-2.2.2 pandas-2.2.3 python-dateutil-2.9.0.post0 pytz-2025.1 six-1.17.0 tzdata-2025.1
+Collecting tabulate
+  Using cached tabulate-0.9.0-py3-none-any.whl (35 kB)
+Installing collected packages: tabulate
+Successfully installed tabulate-0.9.0
+Training

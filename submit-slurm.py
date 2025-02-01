@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 
 
-def makejob(commit_id, configpath, nruns):
+def makejob(commit_id, nruns):
     return f"""#!/bin/bash
 
 #SBATCH --job-name=binsegm
@@ -18,34 +18,15 @@ def makejob(commit_id, configpath, nruns):
 #SBATCH --array=1-{nruns}
 #SBATCH --exclude=sh00,sh[10-19]
 
-current_dir=`pwd`
-export PATH=$PATH:~/.local/bin
-
-echo "Session " ${{SLURM_ARRAY_JOB_ID}}_${{SLURM_ARRAY_TASK_ID}}
-
-echo "Running on " $(hostname)
-
-echo "Copying the source directory and data"
-date
-mkdir $TMPDIR/code
-rsync -r --exclude logs --exclude logslurms --exclude configs . $TMPDIR/code
-
-echo "Checking out the correct version of the code commit_id {commit_id}"
-cd $TMPDIR/code
-git checkout {commit_id}
-
-
 echo "Setting up the virtual environment"
 python3 -m venv $TMPDIR/venv
 source $TMPDIR/venv/bin/activate
 
 # Install the library
-python -m pip install -e .
-pip install pandas
-pip install tabulate
+python -r requirements.txt
 
 echo "Training"
-python -m torchtmpl.main train {configpath}
+python -m lora_training.py
 
 if [[ $? != 0 ]]; then
     exit -1
