@@ -15,7 +15,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 torch.cuda.is_available()
 
 
-model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+model_name = "mistralai/Mistral-7B-Instruct-v0.2"#"deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
 
 # Configure 4-bit quantization
 bnb_config = BitsAndBytesConfig(
@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
 
     # Save the model
-    local_model_path = "/usr/users/sdim/sdim_34/lora-llm/lora_Qwen_1.5B"
+    local_model_path = "/usr/users/sdim/sdim_34/lora-llm/mistral_7B"
     # Sauvegarde en local
     model.save_pretrained(local_model_path)
     tokenizer.save_pretrained(local_model_path)
