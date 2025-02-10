@@ -1,0 +1,50 @@
+  Running command git clone --filter=blob:none --quiet https://github.com/huggingface/peft.git /tmp/sdim_34-89424/pip-req-build-uaq2dd3x
+  Running command git clone --filter=blob:none --quiet https://github.com/huggingface/transformers.git /tmp/sdim_34-89424/pip-req-build-0fohudpx
+Unused kwargs: ['bnb_8bit_compute_dtype']. These kwargs are not used in <class 'transformers.utils.quantization_config.BitsAndBytesConfig'>.
+Downloading shards:   0%|          | 0/4 [00:00<?, ?it/s]Downloading shards:  25%|██▌       | 1/4 [03:29<10:29, 209.75s/it]Downloading shards:  50%|█████     | 2/4 [06:56<06:56, 208.04s/it]Downloading shards:  75%|███████▌  | 3/4 [10:23<03:27, 207.68s/it]Downloading shards: 100%|██████████| 4/4 [11:47<00:00, 158.69s/it]Downloading shards: 100%|██████████| 4/4 [11:47<00:00, 176.86s/it]
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:09<00:27,  9.26s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:18<00:18,  9.48s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:28<00:09,  9.57s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:32<00:00,  7.37s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:32<00:00,  8.14s/it]
+Map:   0%|          | 0/112 [00:00<?, ? examples/s]Map:  49%|████▉     | 55/112 [00:00<00:00, 530.05 examples/s]Map: 100%|██████████| 112/112 [00:00<00:00, 450.74 examples/s]Map: 100%|██████████| 112/112 [00:00<00:00, 447.65 examples/s]
+Map:   0%|          | 0/29 [00:00<?, ? examples/s]Map: 100%|██████████| 29/29 [00:00<00:00, 421.39 examples/s]
+  0%|          | 0/10 [00:00<?, ?it/s]/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/bitsandbytes/autograd/_functions.py:315: UserWarning: MatMul8bitLt: inputs will be cast from torch.float32 to float16 during quantization
+  warnings.warn(f"MatMul8bitLt: inputs will be cast from {A.dtype} to float16 during quantization")
+Traceback (most recent call last):
+  File "/usr/users/sdim/sdim_34/lora-llm/lora_training.py", line 178, in <module>
+    trainer.train()
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/transformers/trainer.py", line 2184, in train
+    return inner_training_loop(
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/transformers/trainer.py", line 2490, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/transformers/trainer.py", line 3598, in training_step
+    loss = self.compute_loss(model, inputs, num_items_in_batch=num_items_in_batch)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/transformers/trainer.py", line 3659, in compute_loss
+    outputs = model(**inputs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/accelerate/utils/operations.py", line 819, in forward
+    return model_forward(*args, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/accelerate/utils/operations.py", line 807, in __call__
+    return convert_to_fp32(self.model_forward(*args, **kwargs))
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/torch/amp/autocast_mode.py", line 44, in decorate_autocast
+    return func(*args, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/peft/peft_model.py", line 1700, in forward
+    return self.base_model(
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/peft/tuners/tuners_utils.py", line 197, in forward
+    return self.model.forward(*args, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/transformers/utils/deprecation.py", line 172, in wrapped_func
+    return func(*args, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 845, in forward
+    loss = self.loss_function(logits=logits, labels=labels, vocab_size=self.config.vocab_size, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/transformers/loss/loss_utils.py", line 47, in ForCausalLMLoss
+    loss = fixed_cross_entropy(logits, shift_labels, num_items_in_batch, ignore_index, **kwargs)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/transformers/loss/loss_utils.py", line 26, in fixed_cross_entropy
+    loss = nn.functional.cross_entropy(source, target, ignore_index=ignore_index, reduction=reduction)
+  File "/tmp/sdim_34-89424/venv/lib/python3.10/site-packages/torch/nn/functional.py", line 3494, in cross_entropy
+    return torch._C._nn.cross_entropy_loss(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.29 GiB. GPU 0 has a total capacity of 23.68 GiB of which 1.40 GiB is free. Including non-PyTorch memory, this process has 22.28 GiB memory in use. Of the allocated memory 21.07 GiB is allocated by PyTorch, and 914.35 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+  0%|          | 0/10 [00:02<?, ?it/s]

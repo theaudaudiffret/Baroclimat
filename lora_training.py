@@ -15,12 +15,12 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 torch.cuda.is_available()
 
 
-
 model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+
 # Configure 4-bit quantization
 bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_compute_dtype=torch.float16  # Use float16 for faster computation
+    load_in_8bit=True,
+    bnb_8bit_compute_dtype=torch.float16  # Use float16 for faster computation
 )
 
 # Load model and tokenizer
@@ -61,7 +61,7 @@ def print_trainable_parameters(model):
 
 
 config = LoraConfig(
-    r=6,
+    r=8,
     lora_alpha=16,
     target_modules=["q_proj", "k_proj"],
     lora_dropout=0.05,
@@ -131,9 +131,10 @@ def classification_up_to_3(text, categories, label_1, label_2, label_3,retry_att
         Donne seulement les 3 classes, parmi {categories}, qui correspondent le mieux au texte donné, de la plus probable à la moins probable.
 
         ## Règles :
-        - Réponds uniquement avec un JSON strict du format suivant : {{ "Classe_1": "categorie_1", "Classe_2": "categorie_2", "Classe_2": "categorie_3" }}
         - Les catégories doivent être dans {categories}.
         - Les classes sont ordonnées de la plus probable à la moins probable.
+        - Réponds uniquement avec un JSON strict du format suivant : {{ "Classe_1": "categorie_1", "Classe_2": "categorie_2", "Classe_2": "categorie_3" }}
+
 
         Texte : "{text}"
 
@@ -158,8 +159,8 @@ trainer = transformers.Trainer(
     args=transformers.TrainingArguments(
         per_device_train_batch_size=4,
         gradient_accumulation_steps=2,
-        warmup_steps=2,
-        max_steps=2,
+        warmup_steps=6,
+        max_steps=10,
         learning_rate=1e-3,
         fp16=True,
         logging_steps=1,
@@ -177,7 +178,7 @@ if __name__ == '__main__':
 
 
     # Save the model
-    local_model_path = "./my_local_model"
+    local_model_path = "/usr/users/sdim/sdim_34/lora-llm/lora_Qwen_1.5B"
     # Sauvegarde en local
     model.save_pretrained(local_model_path)
     tokenizer.save_pretrained(local_model_path)

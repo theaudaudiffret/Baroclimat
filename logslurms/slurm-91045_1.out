@@ -1,0 +1,21 @@
+Setting up the virtual environment
+Collecting git+https://github.com/huggingface/peft.git (from -r requirements.txt (line 6))
+  Cloning https://github.com/huggingface/peft.git to /tmp/sdim_34-91045/pip-req-build-bi4n3b74
+  Resolved https://github.com/huggingface/peft.git to commit 5e03d058b8ca76a7c2c24572bb616a23221b1eb5
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting git+https://github.com/huggingface/transformers.git (from -r requirements.txt (line 7))
+  Cloning https://github.com/huggingface/transformers.git to /tmp/sdim_34-91045/pip-req-build-sh_4zfnd
+  Resolved https://github.com/huggingface/transformers.git to commit 3897f2caf81470b04dce8343bfc11e4ef851d31a
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting bitsandbytes
+  Downloading bitsandbytes-0.45.2-py3-none-manylinux_2_24_x86_64.whl (69.7 MB)
