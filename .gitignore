@@ -1,0 +1,34 @@
+#Ignore le fichier de configuration sensible
+src/config/config.json
+#Other files
+A_No_git
+
+#Ignore les fichiers compilés Python
+pycache/
+*.py[cod]
+*$py.class
+
+#Ignore les environnements virtuels
+env/
+venv/
+.venv/
+ENV/
+
+
+#Ignore les dossiers de build et packaging
+build/
+dist/
+*.egg-info/
+
+#Ignore les fichiers de log, bases de données et caches
+*.log
+*.sqlite3
+.mypy_cache/
+.pytest_cache/
+
+#Ignore les dossiers de configuration d'IDE
+.vscode/
+.idea/
+
+
+

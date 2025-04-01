@@ -1,0 +1,3 @@
+source,Precision,Recall,F1_score,Top 1 Accuracy,Top 3 Accuracy,Percentage of unsure
+Clustering-semi-superivé,53,56,46,55,83,0.0
+Clustering-semi-superivé,53,56,46,55,83,0.0

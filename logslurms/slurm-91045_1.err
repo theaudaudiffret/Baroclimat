@@ -1,3 +1,0 @@
-  Running command git clone --filter=blob:none --quiet https://github.com/huggingface/peft.git /tmp/sdim_34-91045/pip-req-build-bi4n3b74
-  Running command git clone --filter=blob:none --quiet https://github.com/huggingface/transformers.git /tmp/sdim_34-91045/pip-req-build-sh_4zfnd
-slurmstepd: error: *** JOB 91045 ON sh20 CANCELLED AT 2025-02-10T13:46:11 ***

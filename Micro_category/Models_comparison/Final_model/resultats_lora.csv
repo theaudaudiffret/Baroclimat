@@ -1,0 +1,3 @@
+source,Precision,Recall,F1_score,Top 1 Accuracy,Top 3 Accuracy,Percentage of unsure
+Distill-Llama-8B-BOOST,68.1,67.86,64.8,79.31,82.76,0.0
+Distill-Qwen-1.5B,32.27,25.0,27.06,37.93,44.83,13.79

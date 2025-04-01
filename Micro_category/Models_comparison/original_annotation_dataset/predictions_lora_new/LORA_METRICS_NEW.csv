@@ -1,0 +1,6 @@
+source,Precision,Recall,F1_score,Top 1 Accuracy,Top 3 Accuracy,Percentage of unsure
+deepseek-llm-7b-base,16.25,25.0,16.16,27.59,44.83,0.0
+Distill-Llama-8B,38.99,40.62,34.5,50.0,81.25,0.0
+Distill-Qwen-1.5B,11.32,8.33,6.16,8.0,16.0,8.0
+Distill-Qwen-7B,44.99,32.14,27.59,37.93,58.62,6.9
+

@@ -3,5 +3,9 @@ datasets
 accelerate
 loralib
 torch
+torchvision
+torchaudio
+scikit-learn
 git+https://github.com/huggingface/peft.git
 git+https://github.com/huggingface/transformers.git
+transformers[sentencepiece]

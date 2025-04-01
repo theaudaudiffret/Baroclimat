@@ -1,7 +1,0 @@
-Unknown option: -r
-usage: python [option] ... [-c cmd | -m mod | file | -] [arg] ...
-Try `python -h' for more information.
-Traceback (most recent call last):
-  File "/usr/users/sdim/sdim_34/lora-llm/lora_training.py", line 5, in <module>
-    import bitsandbytes as bnb
-ModuleNotFoundError: No module named 'bitsandbytes'
