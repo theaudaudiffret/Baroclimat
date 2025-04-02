@@ -68,15 +68,10 @@ pip install -r requirements.txt
 python3 Micro_category/Inference.py
 ```
 
-## Training a Model on Macro Categories
-
-Modify `lora_paths`, `save_paths`, `path_data`, then run:
+## Testing Your Trained Models with 5 Categories
 
 ```sh
-python3 Macro_category/lora_training_MACRO.py
+python3 Macro_category/Inference.py
 ```
 
-## To Do
-- Verify paths
-- Automate processes
 

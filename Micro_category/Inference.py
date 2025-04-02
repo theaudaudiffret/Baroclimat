@@ -32,30 +32,22 @@ print("Token récupéré avec succès.")
 # Exécute la commande Hugging Face CLI login
 subprocess.run(["huggingface-cli", "login", "--token", token], check=True)
 
-def compute_metrics(lora_paths, save_paths, path_data):
+def compute_metrics(lora_paths, save_paths, path_data, full):
     if len(lora_paths) != len(save_paths):
         raise ValueError("Les listes lora_paths et save_paths doivent avoir la même longueur.")
 
     for j, lora_path in enumerate(lora_paths):
-
-        # Configuration pour charger le modèle en 8 bits
-       #bnb_config = BitsAndBytesConfig(load_in_8bit=True)
 
         # Charger la configuration du modèle LoRA
         config = PeftConfig.from_pretrained(lora_path)
         model = AutoModelForCausalLM.from_pretrained(
             config.base_model_name_or_path,
             return_dict=True,
-            #torch_dtype=torch.float16,
-            device_map='auto',
-            #quantization_config=bnb_config  # Appliquer la configuration BitsAndBytesConfig
-        )
+            torch_dtype=torch.float16,
+            device_map='auto')
         tokenizer = AutoTokenizer.from_pretrained(config.base_model_name_or_path)
 
-        qa_model = PeftModel.from_pretrained(model, lora_path,  offload_folder="outputs"
-)
-
-
+        qa_model = PeftModel.from_pretrained(model, lora_path, offload_dir="offload_dir")
 
         categories = [
             "Gaz à effet de serre",
@@ -103,7 +95,7 @@ def compute_metrics(lora_paths, save_paths, path_data):
             """
             # Préparer le prompt pour le modèle
             prompt_message = f"""
-            Donne seulement les {k} classes, parmi {categories}, qui correspondent le mieux au texte donné, de la plus probable à la moins probable.
+            Donne au maximum les {k} classes, parmi {categories}, qui correspondent le mieux au texte donné, de la plus probable à la moins probable.
 
             ## Règles :
             - Les catégories doivent être dans {categories}.
@@ -161,6 +153,9 @@ def compute_metrics(lora_paths, save_paths, path_data):
         path = path_data
         df = pd.read_csv(path, sep=";")
         df['label'] = 1
+        if full == False:
+            df = df.tail(int(0.2 * len(df)))
+            
         df["prediction_label"] = None
         for idx, row in df.iterrows():
             df.at[idx, "prediction_label"] = classification_up_to_k(row["description"], tokenizer, qa_model, categories, k=3)
@@ -179,7 +174,7 @@ def compute_metrics(lora_paths, save_paths, path_data):
             except (TypeError, IndexError):
                 return None  # Retourne None pour faciliter la suppression des NaN
 
-        # Extraction des labels et probabilités
+        # Extraction des labels 
         for i in range(1, 4):
             df[f"prediction_label_{i}"] = df["prediction_label"].apply(lambda x: safe_extract(x, f"Classe_{i}"))
 
@@ -220,138 +215,35 @@ def compute_metrics(lora_paths, save_paths, path_data):
     }
 
 
-    # Cause
-    # Gaz à effet de serre
-    gaz_effet_de_serre = ["co2", "méthane", "protoxyde", "azote" "oxyde", "nitreux", "ozone", "chlorofluorocarbones", "hydrofluorocarbones", "perfluorocarbones", "soufre",
-                        "hexafluorure", "gaz", "émissions", "serre", "carbone", "dioxyde", "air", "fossile"]
-
-    # Utilisation des terres
-    agriculture_et_utilisation_du_sol = ["agriculture", "sol", "changement", "érosion", "désertification", "dégradation", "aérosol", "pulvérisation", "bétail",
-                            "agricultures", "vache", "bovin", "culture", "rendement", "récolte", "engrais", "pesticide", "labour"]
-
-    # Pêches et chasses
-    peche_et_chasse = ["poisson", "pêche", "chasse", "baleine", "disparition", "extinction", "espèces", "surpêche", "surchasse", "quota", "capture",
-                    "prédateur"]
-
-    # Intrant chimique / pollution plastique
-    intrants_chimique_pollution_plastique = ["plastique", "pollution", "microplastique", "microplastiques", "plastiques", "déchets", "ordures", "détritus",
-                                            "recyclage", "recycler", "chimique", "décharge", "industrielle", "contamination", "engrais"]
-
-    # Surconsommation
-    surconsommation = ["surconsommation", "consommation", "comportement", "achat", "compulsif", "gaspillage", "excès", "superflu", "masse", "hyperconsommation"
-                    "style", "vie", "possession", "dépenser", "frénésie"]
-
-    # Déforestation
-    deforestation = ["déforestation", "forêt", "déboiser", "déforestier", "végétation", "arbre", "arbres", "végétal", "exploitation", "défrichement",
-                    "défricher", "abattage"]
-
-    cause_thematiques = {"gaz_effet_de_serre": gaz_effet_de_serre,
-                        "agriculture_et_utilisation_du_sol": agriculture_et_utilisation_du_sol,
-                        "peche_et_chasse": peche_et_chasse,
-                        "intrants_chimique_pollution_plastique": intrants_chimique_pollution_plastique,
-                        "surconsommation": surconsommation,
-                        "deforestation": deforestation}
+    cause_thematiques = {"gaz_effet_de_serre": "gaz_effet_de_serre",
+                        "agriculture_et_utilisation_du_sol": "agriculture_et_utilisation_du_sol",
+                        "peche_et_chasse": "peche_et_chasse",
+                        "intrants_chimique_pollution_plastique": "intrants_chimique_pollution_plastique",
+                        "surconsommation": "surconsommation",
+                        "deforestation": "deforestation"}
 
 
-    # Conséquences
-    # Catastrophes naturelles
-    catastrophes_naturelles = ["catastrophe", "naturelle", "inondation", "catastrophique", "phénomène", "cyclone", "séisme",
-                                "ouragan", "tempête", "dérégulation", "climatologie", "grêle", "vent", "typhon", "tornade", "tsunami"]
 
-    # Réchauffement climatique / canicule
-    rechauffement_climatique_canicule = ["réchauffement", "climatique", "chauffage", "température", "chaleur", "canicule",
-                                        "chaud", "adaptation", "thermomètre", "extrême", "caniculaire"]
+    consequence_thematiques = {"catastrophes_naturelles":"catastrophes_naturelles",
+                            "rechauffement_climatique_canicule":"rechauffement_climatique_canicule",
+                                "secheresse":"secheresse",
+                                "couche_ozone":"couche_ozone",
+                                "feu_foret":"feu_foret",
+                                "tension_alim_famines":"tension_alim_famines",
+                                "eau_potable":"eau_potable",
+                                "hausse_niveau_mer_fonte_glace":"hausse_niveau_mer_fonte_glace",
+                                "consequence_sociale":"consequence_sociale",
+                                "acidification_ocean":"acidification_ocean",
+                                "perte_biodiversite":"perte_biodiversite",
+                                "pollution":"pollution"}
 
-    # Sécheresse
-    secheresse = ["pénurie", "aridité", "déficit", "assèchement", "sols", "manque", "precipitations", "réserves", "désert", "sécheresse", "désertique",
-                "déshydratation", "irrigation", "humidité"]
-
-    # Couche d'ozone
-    couche_ozone = ["ozone", "appauvrissement", "trous", "chlorofluorocarbures", "Halons", "ultraviolet", "nocif", "rayonnement", "stratosphère"]
-
-    # Feu de forêt
-    feu_foret = ["incendies", "feu", "forêt", "pompier", "incontrôlé", "propagation", "fumée", "brulée", "étendue", "ardent", "incondescent", "pyromane"]
-
-    # Tension alimentaires / famines
-    tension_alim_famines = ["insécurité", "alimentaire", "famine", "malnutrition", "crise", "rareté", "besoins", "déficit", "sécurité", "affamé", "pénurie"]
-
-    # Perte d'eau douce
-    eau_potable = ["eau", "douce", "fraîche", "potable", "boire", "potable", "potabilité", "dégradation", "qualité", "crise", "raréfaction",
-                "nappes", "phréatiques", "courante", "cristalline", "filtration", "purification", "assainissement"]
-
-    # Hausse du niveau de la mer et fontes des glaces
-    hausse_niveau_mer_fonte_glace = ["hausse", "mer", "océan", "océanique", "niveau", "fonte", "montée", "élévation", "côte", "marée",
-                                    "bloc", "glace", "iceberg", "glacier", "permafrost", "banquise", "dégel"]
-
-    # Conséquences sociales
-    consequence_sociale = ["logement", "population", "déplacement", "conflit", "migration", "instabilité", "sociale", "mentale", "inégalité", "santé",
-                        "mode", "vie", "pauvreté", "communauté", "vulnérabilité", "précarité", "exclusion", "dépendance", "société", "humain"]
-
-    # Acidification océan
-    acidification_ocean = ["acidification", "acidité", "pH", "carbonate", "calcium", "coraux", "marins", "mollusques", "coquilles", "plankton", "acidose",
-                        "océan"]
-
-    # Perte de biodiversité
-    perte_biodiversite = ["biodiversité", "espèces", "extinction", "disparition", "animaux", "plante", "végétation", "sauvage", "menacées", "menacé",
-                        "récolte", "cultures", "écologie", "marine", "terre", "réserve", "habitat", "corail", "écosystème", "conservation",
-                        "fragilité", "urgence"]
-
-    # Pollution
-    pollution = ["air", "eau", "sol", "émissions", "gaz", "pollution", "polluant", "déchet", "toxique", "atmosphérique", "contamination", "industriel",
-                "chimique", "résidus", "dégradation", "détritus"]
-
-    consequence_thematiques = {"catastrophes_naturelles":catastrophes_naturelles,
-                            "rechauffement_climatique_canicule":rechauffement_climatique_canicule,
-                                "secheresse":secheresse,
-                                "couche_ozone":couche_ozone,
-                                "feu_foret":feu_foret,
-                                "tension_alim_famines":tension_alim_famines,
-                                "eau_potable":eau_potable,
-                                "hausse_niveau_mer_fonte_glace":hausse_niveau_mer_fonte_glace,
-                                "consequence_sociale":consequence_sociale,
-                                "acidification_ocean":acidification_ocean,
-                                "perte_biodiversite":perte_biodiversite,
-                                "pollution":pollution}
-
-
-    # Solutions
-    # Énergies renouvelables et nucléaires
-    energies_renouvelables_et_nucleaires = ["renouvelable", "solaire", "éolien", "biomasse", "géothermique", "hydraulique", "hydroélectrique", "photovoltaïque",
-                                    "durabilité", "transition", "nucléaire", "propre", "thermique", "durable", "électricité", "électrique", "puissance",
-                                    "stockage", "fission", "fusion"]
-
-    # Transport décarbonés
-    transport_decarbone = ["véhicule", "électrique", "batterie", "commun", "transport", "hybride", "covoiturage", "vélo", "hydrogène", "aménagement", "mobilité",
-                        "routier", "ferroviaire", "électrification"]
-
-    # Engagement politique et entreprises
-    engagement_politique_et_entreprises = ["gouvernance", "législation", "accord", "engagement", "stratégie", "diplomatie", "acteurs", "lobbying", "participation",
-                                        "responsabilité", "traités", "financement", "Paris", "régulation", "organisations", "politique", "économie",
-                                        "projet", "loi", "certification", "investissement"]
-
-    # Activisme écologique
-    activisme_eco = ["militantisme", "mouvement", "écologie", "marches", "protestation", "défense", "environnement", "activisme", "engagement", "protection",
-                    "grève", "boycott", "mobilisation", "plaidoyer", "désobéissance", "civile", "dénonciation", "dénoncer", "action", "manifestation"]
-
-    # Solutions innovantes
-    solution_innovante = ["technologie", "verte", "innovation", "développement", "produit", "nouvelle", "approche", "technologie", "propre", "recherche",
-                        "écoconception", "circulaire", "créativité", "créatif", "alternatif", "solution"]
-
-    # Comportement de consommation
-    comportement_consommateur = ["consommateur", "consommation", "comportement", "style", "vie", "responsable", "durable", "minimalisme", "consciente",
-                                "équitable", "éthique", "locaux", "collaborative", "collectivité", "astuce"]
-
-    # Reforestation
-    reforestation = ["reboisement", "plantation", "replantation", "arbre", "reforestation", "carbone", "lutte", "régénération", "régénérer", "restauration",
-                    "forêt", "biodiversité", "reconstitution", "sylviculture", "boisement", "repeuplement", "repeupler"]
-
-    solution_thematiques = {"energies_renouvelables_et_nucleaires": energies_renouvelables_et_nucleaires,
-                            "transport_decarbone": transport_decarbone,
-                            "engagement_politique_et_entreprises": engagement_politique_et_entreprises,
-                            "activisme_eco": activisme_eco,
-                            "solution_innovante": solution_innovante,
-                            "comportement_consommateur": comportement_consommateur,
-                            "reforestation": reforestation}
+    solution_thematiques = {"energies_renouvelables_et_nucleaires": "energies_renouvelables_et_nucleaires",
+                            "transport_decarbone": "transport_decarbone",
+                            "engagement_politique_et_entreprises": "engagement_politique_et_entreprises",
+                            "activisme_eco": "activisme_eco",
+                            "solution_innovante": "solution_innovante",
+                            "comportement_consommateur": "comportement_consommateur",
+                            "reforestation": "reforestation"}
 
 
     def format_labels(labels, mapping):
@@ -464,15 +356,19 @@ def compute_metrics(lora_paths, save_paths, path_data):
     result.set_index("source", inplace=True)
 
 
-    file_path = "New_annotation_Inference/results.csv"
+    file_path = "Micro_category/Metrics/results.csv"
     write_header = not os.path.exists(file_path)  # Écrire l'en-tête seulement si le fichier n'existe pas
 
-    result.to_csv(file_path, mode="a", header=write_header, index=False)
+    result.to_csv(file_path, mode="a", header=write_header)
 
     return result
 
 if __name__ == "__main__":
-    compute_metrics(lora_paths=["models/lora_distill_Qwen_1.5B_boost"],
-                    save_paths=["New_annotation_Inference/model_pred.csv"],
-                    path_data="data/Annotations_sous_thematiques.csv")
-        
+    compute_metrics(lora_paths=["models/lora-distill-llama-8b-boost"],
+                    save_paths=["Micro_category/Inference/predictions_Micro-lora-8B-2.csv"],
+                    path_data="data/Annotations_macro_thematiques_new.csv",
+                    full=False
+                    )
+    # Put true as an argument for full if you want to make the inference on the whole dataset
+    # False is for splitting the dataset between train and test 
+    

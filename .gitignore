@@ -1,7 +1,5 @@
 #Ignore le fichier de configuration sensible
 src/config/config.json
-#Other files
-A_No_git
 
 #Ignore les fichiers compilés Python
 pycache/
@@ -31,4 +29,9 @@ dist/
 .idea/
 
 
+
+#Other files
+A_No_git
+job.batch
+Bert_sub_classification
 
