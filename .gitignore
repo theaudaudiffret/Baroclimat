@@ -31,7 +31,7 @@ dist/
 
 
 #Other files
-outputs
+outputs/
 A_No_git
 job.batch
 Bert_sub_classification
