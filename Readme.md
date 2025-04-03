@@ -42,6 +42,8 @@ Readme.md
 requirements.txt
 ```
 
+The code was tested using '''Python 3.9.13'''
+
 ## Getting Started
 
 1. Put your API key in a config file you will create at `src/config/config.json`:
