@@ -9,3 +9,12 @@ scikit-learn
 git+https://github.com/huggingface/peft.git
 git+https://github.com/huggingface/transformers.git
 transformers[sentencepiece]
+azureml-core
+nltk 
+loguru
+dotenv
+seaborn
+azure-storage-blob
+azureml-dataset-runtime
+unidecode
+deep-translator
