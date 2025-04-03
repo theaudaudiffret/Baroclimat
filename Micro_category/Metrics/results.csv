@@ -1,4 +1,3 @@
 source,Precision,Recall,F1_score,Top 1 Accuracy,Top 3 Accuracy
 Distill-llama-8B, 49.42,35.96,38.28,58.64,68.59
 Distill-Qwen-1B5, 18.78,10.78,10.74,16.15,22.4
-Micro-lora-8B-2,83.33,55.56,66.67,12.82,12.82,15.38

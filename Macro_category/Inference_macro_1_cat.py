@@ -76,13 +76,12 @@ def compute_metrics(lora_paths, save_paths, path_data, full=True):
             """
             # Préparer le prompt pour le modèle
             prompt_message = f"""
-            Donne au maximum les {k} classes, parmi {categories}, qui correspondent le mieux au texte donné, de la plus probable à la moins probable.
+            Donne la classe, parmi {categories}, qui correspond le mieux au texte donné,
             
             
             ## Règles :
-            - Les catégories doivent être dans {categories}.
-            - Les classes sont ordonnées de la plus probable à la moins probable.
-            - Réponds uniquement avec un JSON strict du format suivant : {{ "Classe_1": "categorie_1", "Classe_2": "categorie_2", "Classe_3": "categorie_3" }}
+            - La catégories doivent être dans {categories}.
+            - Réponds uniquement avec un JSON strict du format suivant : {{ "Classe_1": "categorie"}}
 
 
             Texte : "{text}"
@@ -152,7 +151,7 @@ def compute_metrics(lora_paths, save_paths, path_data, full=True):
             try:
                 # Si x est un dictionnaire et contient la clé, extraire l'index demandé
                 if isinstance(x, dict):
-                    return x.get(key, [None, None])  # Valeur par défaut = None (pour NaN)
+                    return x.get(key, [None])  # Valeur par défaut = None (pour NaN)
             except (TypeError, IndexError):
                 return None  # Retourne None pour faciliter la suppression des NaN
 
@@ -199,9 +198,7 @@ def compute_metrics(lora_paths, save_paths, path_data, full=True):
         top1_acc = round(df_results.apply(lambda x: top1_accuracy(x[pred_col], x["label"]), axis=1).sum() / len(df_results) * 100, 2)
         top3_acc = round(df_results.apply(lambda x: top3_accuracy(x[pred_col], x["label"]), axis=1).sum() / len(df_results) * 100, 2)
 
-        # Percentage of unsure predictions (empty predictions)
-        unsure_percentage = round(df_results.apply(lambda x: 1 if len(x[pred_col]) == 0 else 0, axis=1).sum() / len(df_results) * 100, 2)
-
+ 
         # Create a DataFrame with the results
         df_score_global = pd.DataFrame({
             "Precision": [precision],
@@ -209,7 +206,6 @@ def compute_metrics(lora_paths, save_paths, path_data, full=True):
             "F1_score": [f1],
             "Top 1 Accuracy": [top1_acc],
             "Top 3 Accuracy": [top3_acc],
-            "Percentage of unsure": [unsure_percentage]
         })
 
         return df_score_global.round(2)
@@ -270,7 +266,7 @@ if __name__ == "__main__":
     You want to make inference using multiple models at a time
     """
     compute_metrics(lora_paths=["./models/Macro-lora-8B"], # path of the model
-                    save_paths=["Macro_category/Inference/predictions_Macro-lora-8B.csv"], # save path
+                    save_paths=["Macro_category/Inference/predictions_Macro-lora-8B-1-cat.csv"], # save path
                     path_data="data/Annotations_macro_thematiques_new.csv",
                     full=False) 
     # Put true as an argument for full if you want to make the inference on the whole dataset

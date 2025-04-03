@@ -1,2 +1,2 @@
-source,Precision,Recall,F1_score,Top 1 Accuracy,Top 3 Accuracy,Percentage of unsure
-Macro-lora-8B,58.14,70.91,55.86,69.7,90.91
+source,Precision,Recall,F1_score,Top 1 Accuracy,Top 3 Accuracy
+Macro-lora-8B-1-cat,74.44,31.48,36.65,54.84,54.84
