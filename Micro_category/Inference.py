@@ -32,7 +32,7 @@ print("Token récupéré avec succès.")
 # Exécute la commande Hugging Face CLI login
 subprocess.run(["huggingface-cli", "login", "--token", token], check=True)
 
-def compute_metrics(lora_paths, save_paths, path_data, full):
+def compute_metrics(lora_paths, save_paths, path_data, full, get_metrics):
     if len(lora_paths) != len(save_paths):
         raise ValueError("Les listes lora_paths et save_paths doivent avoir la même longueur.")
 
@@ -151,8 +151,8 @@ def compute_metrics(lora_paths, save_paths, path_data, full):
 
 
         path = path_data
-        df = pd.read_csv(path, sep=";")
-        df['label'] = 1
+        df = pd.read_csv(path)
+        df = df[df['label'] == 1]
         if full == False:
             df = df.tail(int(0.2 * len(df)))
             
@@ -335,39 +335,36 @@ def compute_metrics(lora_paths, save_paths, path_data, full):
         )
         # Affiche les labels bruts avant de les passer à format_labels
 
-
-        # Count hallucinations (N/A in predictions)
-        counter = sum(1 for preds in df_results["pred_label"] if "N/A" in preds)
-        print(f"Nombre de documents avec une hallucination: {counter}")
-
         return get_perf(df_results, "pred_label")
     result = pd.DataFrame()
 
-    for path in save_paths:
-        df_result = pipe(path)
+    if get_metrics == True:
+        for path in save_paths:
+            df_result = pipe(path)
 
-        if df_result is not None and not df_result.empty:
-            filename = os.path.basename(path)
-            index_name = filename.replace(".csv", "").split("_")[-1]
+            if df_result is not None and not df_result.empty:
+                filename = os.path.basename(path)
+                index_name = filename.replace(".csv", "").split("_")[-1]
 
-            df_result["source"] = index_name
-            result = pd.concat([result, df_result], ignore_index=True)
+                df_result["source"] = index_name
+                result = pd.concat([result, df_result], ignore_index=True)
 
-    result.set_index("source", inplace=True)
+        result.set_index("source", inplace=True)
 
 
-    file_path = "Micro_category/Metrics/results.csv"
-    write_header = not os.path.exists(file_path)  # Écrire l'en-tête seulement si le fichier n'existe pas
+        file_path = "Micro_category/Metrics/results.csv"
+        write_header = not os.path.exists(file_path)  # Écrire l'en-tête seulement si le fichier n'existe pas
 
-    result.to_csv(file_path, mode="a", header=write_header)
+        result.to_csv(file_path, mode="a", header=write_header)
 
-    return result
+        return result
 
 if __name__ == "__main__":
     compute_metrics(lora_paths=["models/lora-distill-llama-8b-boost"],
-                    save_paths=["Micro_category/Inference/predictions_Micro-lora-8B-2.csv"],
-                    path_data="data/Annotations_macro_thematiques_new.csv",
-                    full=False
+                    save_paths=["Micro_category/Inference/predictions_2024_Micro-lora-8B-2.csv"],
+                    path_data="data/2024_JT_TF1_F2.csv",
+                    full=True,
+                    get_metrics = False
                     )
     # Put true as an argument for full if you want to make the inference on the whole dataset
     # False is for splitting the dataset between train and test 

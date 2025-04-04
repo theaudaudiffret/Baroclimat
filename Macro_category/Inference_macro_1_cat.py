@@ -32,7 +32,7 @@ print("Token récupéré avec succès.")
 # Exécute la commande Hugging Face CLI login
 subprocess.run(["huggingface-cli", "login", "--token", token], check=True)
 
-def compute_metrics(lora_paths, save_paths, path_data, full=True):
+def compute_metrics(lora_paths, save_paths, path_data, full, get_metrics):
     if len(lora_paths) != len(save_paths):
         raise ValueError("Les listes lora_paths et save_paths doivent avoir la même longueur.")
 
@@ -240,35 +240,38 @@ def compute_metrics(lora_paths, save_paths, path_data, full=True):
 
         return get_perf(df_results, "pred_label")
     result = pd.DataFrame()
-
-    for path in save_paths:
-        df_result = pipe(path)
-
-        if df_result is not None and not df_result.empty:
-            filename = os.path.basename(path)
-            index_name = filename.replace(".csv", "").split("_")[-1]
-
-            df_result["source"] = index_name
-            result = pd.concat([result, df_result], ignore_index=True)
+    if get_metrics == True:
 
 
-    result.set_index("source", inplace=True)
+        for path in save_paths:
+            df_result = pipe(path)
 
-    path_data = "Macro_category/Metrics/Macro_resultats.csv"
-    write_header = not os.path.exists(path_data)  # Écrire l'en-tête seulement si le fichier n'existe pas
+            if df_result is not None and not df_result.empty:
+                filename = os.path.basename(path)
+                index_name = filename.replace(".csv", "").split("_")[-1]
 
-    result.to_csv(path_data, mode="a", header=write_header)
+                df_result["source"] = index_name
+                result = pd.concat([result, df_result], ignore_index=True)
 
-    return result
+
+        result.set_index("source", inplace=True)
+
+        path_data = "Macro_category/Metrics/Macro_resultats.csv"
+        write_header = not os.path.exists(path_data)  # Écrire l'en-tête seulement si le fichier n'existe pas
+
+        result.to_csv(path_data, mode="a", header=write_header)
+
+        return result
 
 if __name__ == "__main__":
     """
     You want to make inference using multiple models at a time
     """
     compute_metrics(lora_paths=["./models/Macro-lora-8B"], # path of the model
-                    save_paths=["Macro_category/Inference/predictions_Macro-lora-8B-1-cat.csv"], # save path
-                    path_data="data/Annotations_macro_thematiques_new.csv",
-                    full=False) 
+                    save_paths=["Macro_category/Inference/predictions_2024_Macro-lora-8B-1-cat.csv"], # save path
+                    path_data="data/2024_JT_TF1_F2.csv",
+                    full=True,
+                    get_metrics=False) 
     # Put true as an argument for full if you want to make the inference on the whole dataset
     # False is for splitting the dataset between train and test 
     
