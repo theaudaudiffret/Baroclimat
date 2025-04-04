@@ -18,3 +18,7 @@ azure-storage-blob
 azureml-dataset-runtime
 unidecode
 deep-translator
+ipykernel
+azureml-dataset-runtime
+pyarrow
+streamlit
