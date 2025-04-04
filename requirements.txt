@@ -22,3 +22,5 @@ ipykernel
 azureml-dataset-runtime
 pyarrow
 streamlit
+matplotlib
+seaborn
