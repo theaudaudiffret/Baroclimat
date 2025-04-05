@@ -7,7 +7,7 @@ import seaborn as sns
 
 
 def show():
-    st.title("📊 Dashboard 2024")
+    st.title("📊 De quel sujet a-t-on parlé sur TF1 et France 2 en 2024?")
     st.write("Bienvenue sur la page du Dashboard.")
 
     # Initialisation de la sélection dans session_state
@@ -219,7 +219,7 @@ def show():
         # ======================================================
         # 6. Histogramme proportionnel par mois avec ordre et palette fixes
         # ======================================================
-        st.markdown("## Proportion des sous-catégories pour un mois sélectionné")
+        st.markdown("## Répartition des sous-catégories mois par mois")
 
         # Slider pour sélectionner un mois (1 à 12)
         selected_month_single = st.slider("Sélectionnez un mois", min_value=1, max_value=12, value=1, step=1)

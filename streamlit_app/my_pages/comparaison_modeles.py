@@ -5,11 +5,14 @@ import matplotlib.pyplot as plt
 
 def show():
     st.title("🤖 Comparaison des modèles")
-    st.write("Comparaison entre les différents modèles...")
+    st.write("Les modèles ont été comparé sur la base de données de l'annotation originale faite par les étudiants de l'année passée. "
+             "Nous comparons dans un premier temps les performances des modèles entre eux et avec leur version fine-tunée. "
+             "Le but est ensuite de garder le meilleur modèle et de comparer les résultats avec ceux obtenus par le modèle de clustering semi-supervisé qui avait été mis en place et qui utilise FastText.")
     # -------------------------
     # Chargement des CSV
     # -------------------------
     st.header("Quel modèle choisir ?")
+    
 
     # Chargement des fichiers pour l'analyse 4 bits
     df_lora_4_bits = pd.read_csv('Micro_category/Models_comparison/original_annotation_dataset/inference_lora_new/LORA_METRICS_NEW.csv')
