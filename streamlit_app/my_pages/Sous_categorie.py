@@ -4,8 +4,6 @@ import math
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
-
 def show():
     st.title("📊 De quel sujet a-t-on parlé sur TF1 et France 2 en 2024?")
     st.write("Bienvenue sur la page du Dashboard.")
@@ -28,7 +26,6 @@ def show():
     categories = None
 
     if st.session_state.selection == "Micro":
-
         csv_path = "Micro_category/Inference/predictions_2024_Micro-lora-8B.csv"
         categories = [
             "gaz_effet_de_serre",
@@ -57,9 +54,8 @@ def show():
             "comportement_consommateur",
             "reforestation"
         ]
-
     elif st.session_state.selection == "Macro":
-        csv_path = "Macro_category/Inference/predictions_Macro-lora-8B-1-cat.csv"
+        csv_path = "Macro_category/Inference/predictions_2024_Macro-lora-8B-1-cat.csv"
         categories = [
             "pollution",
             "ecosystemes",
@@ -70,7 +66,6 @@ def show():
 
     # Charger le CSV si un bouton a été cliqué
     if csv_path and categories:
-
         # Chemin vers le fichier CSV
         df = pd.read_csv(csv_path)
 
@@ -117,15 +112,21 @@ def show():
         colonnes_a_supprimer = [
             "order", "presenter", "editorDeputy", "url",
             "urlTvNews", "containsWordGlobalWarming", "top_words", 
-            "confidence", "prediction_label"
+            "confidence", "prediction_label", "authors", "editor"
         ]
         df_filtre.drop(columns=[col for col in colonnes_a_supprimer if col in df_filtre.columns], inplace=True)
 
         # ======================================================
-        # 3. Filtre par catégorie (présente dans l'une des 3 colonnes)
+        # 3. Filtre par catégorie (présente dans l'une des colonnes de prédiction)
         # ======================================================
-        cat_cols = ["prediction_label_1", "prediction_label_2", "prediction_label_3"]
-        all_cats = categories
+        if st.session_state.selection == "Micro":
+            cat_cols = ["prediction_label_1", "prediction_label_2", "prediction_label_3"]
+        else:  # Macro
+            cat_cols = ["prediction_label_1"]
+            # On peut également drop les colonnes inutiles si elles existent
+            df_filtre.drop(columns=[col for col in ["prediction_label_2", "prediction_label_3"] if col in df_filtre.columns], inplace=True)
+
+        all_cats = categories.copy()
         all_cats.sort()
         selected_cats = st.multiselect("Sélectionnez la ou les catégories", options=all_cats)
 
@@ -174,11 +175,17 @@ def show():
         # 5. Répartition des catégories prédites
         # ======================================================
         st.markdown("## Répartition des catégories prédites")
-        all_preds = pd.concat([
-            df_filtre["prediction_label_1"],
-            df_filtre["prediction_label_2"],
-            df_filtre["prediction_label_3"]
-        ])
+        if st.session_state.selection == "Micro":
+            # Concaténation des 3 colonnes pour Micro
+            all_preds = pd.concat([
+                df_filtre["prediction_label_1"],
+                df_filtre["prediction_label_2"],
+                df_filtre["prediction_label_3"]
+            ])
+        else:
+            # Pour Macro, seule la colonne prediction_label_1 est utilisée
+            all_preds = df_filtre["prediction_label_1"]
+            
         all_preds = all_preds[all_preds.isin(categories)]
         cat_counts = all_preds.value_counts().sort_values(ascending=False)
         pastel_palette = sns.color_palette("pastel", len(cat_counts))
@@ -216,6 +223,7 @@ def show():
                 fontsize="small"
             )
             st.pyplot(fig2)
+        
         # ======================================================
         # 6. Histogramme proportionnel par mois avec ordre et palette fixes
         # ======================================================
@@ -231,12 +239,16 @@ def show():
         if df_month.empty:
             st.write("Aucune donnée pour ce mois.")
         else:
-            # Combiner les prédictions des 3 colonnes pour le mois sélectionné
-            all_preds_month = pd.concat([
-                df_month["prediction_label_1"],
-                df_month["prediction_label_2"],
-                df_month["prediction_label_3"]
-            ])
+            # Combiner les prédictions pour le mois sélectionné
+            if st.session_state.selection == "Micro":
+                all_preds_month = pd.concat([
+                    df_month["prediction_label_1"],
+                    df_month["prediction_label_2"],
+                    df_month["prediction_label_3"]
+                ])
+            else:
+                all_preds_month = df_month["prediction_label_1"]
+                
             # Ne conserver que les prédictions qui figurent dans la liste des catégories
             all_preds_month = all_preds_month[all_preds_month.isin(categories)]
             
@@ -269,3 +281,4 @@ def show():
                 ax.set_title(f"Proportion des sous-catégories en {month_dict[selected_month_single]}")
                 ax.tick_params(axis='x', rotation=90)
                 st.pyplot(fig)
+
