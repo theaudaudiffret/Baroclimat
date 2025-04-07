@@ -24,3 +24,5 @@ pyarrow
 streamlit
 matplotlib
 seaborn
+altair
+datetime
