@@ -243,6 +243,7 @@ def show():
                 ax1.set_title("Occurrences par catégorie")
                 ax1.tick_params(axis='x', rotation=90)
                 st.pyplot(fig1)
+
             with col2:
                 fig2, ax2 = plt.subplots(figsize=(7, 6))
                 total = cat_counts.sum()
@@ -269,61 +270,48 @@ def show():
             # ======================================================
             # 6. Histogramme proportionnel par mois avec ordre et palette fixes
             # ======================================================
-            st.markdown("## Répartition des sous-catégories mois par mois")
 
-            # Slider pour sélectionner un mois (1 à 12)
-            selected_month_single = st.slider("Sélectionnez un mois", min_value=1, max_value=12, value=1, step=1)
-            selected_month_name = month_dict[selected_month_single]
-        
-            # Filtrer le DataFrame pour le mois sélectionné
-            df_month = df_filtre[df_filtre["mois"] == selected_month_name]
 
-            if df_month.empty:
-                st.write("Aucune donnée pour ce mois.")
-            else:
-                # Combiner les prédictions pour le mois sélectionné
-                if st.session_state.selection == "Micro":
-                    all_preds_month = pd.concat([
-                        df_month["prediction_label_1"],
-                        df_month["prediction_label_2"],
-                        df_month["prediction_label_3"]
-                    ])
-                else:
-                    all_preds_month = df_month["prediction_label_1"]
-                    
-                # Ne conserver que les prédictions qui figurent dans la liste des catégories
-                all_preds_month = all_preds_month[all_preds_month.isin(categories)]
-                
-                total_preds = all_preds_month.shape[0]
-                if total_preds == 0:
-                    st.write("Aucune prédiction valide pour ce mois.")
-                else:
-                    # Définir un ordre fixe pour les catégories (ordre alphabétique ici, à adapter si nécessaire)
-                    ordered_categories = sorted(categories)
-                    
-                    # Calculer le nombre d'occurrences par catégorie en réindexant pour avoir toutes les catégories
-                    cat_counts_month = all_preds_month.value_counts().reindex(ordered_categories, fill_value=0)
-                    proportions = cat_counts_month / total_preds * 100
+            # Fusionner les trois colonnes de prédiction
+            df_long = pd.melt(
+                df_filtre,
+                id_vars=["date"],
+                value_vars=["prediction_label_1", "prediction_label_2", "prediction_label_3"],
+                var_name="prediction_rank",
+                value_name="category"
+            )
 
-                    # Création d'une palette de couleurs fixe pour chaque catégorie
-                    palette = sns.color_palette("pastel", len(ordered_categories))
-                    color_mapping = dict(zip(ordered_categories, palette))
-                    colors = [color_mapping[cat] for cat in ordered_categories]
-                    
-                    # Création de l'histogramme
-                    fig, ax = plt.subplots(figsize=(10, 6))
-                    sns.barplot(
-                        x=ordered_categories, 
-                        y=proportions.values, 
-                        palette=colors, 
-                        ax=ax
-                    )
-                    ax.set_xlabel("Catégorie")
-                    ax.set_ylabel("Pourcentage (%)")
-                    ax.set_title(f"Proportion des sous-catégories en {month_dict[selected_month_single]}")
-                    ax.tick_params(axis='x', rotation=90)
-                    st.pyplot(fig)
+            # Garder uniquement les catégories à visualiser
+            df_long = df_long[df_long["category"].isin(categories)]
 
+            # Extraire l'année et le mois comme nouvelle colonne "month"
+            df_long["month"] = df_long["date"].dt.to_period("M").dt.to_timestamp()
+
+            # Compter les occurrences par mois et catégorie
+            df_counts = (
+                df_long.groupby(["month", "category"])
+                .size()
+                .reset_index(name="count")
+            )
+
+            # Calculer le total mensuel pour chaque mois
+            total_per_month = df_counts.groupby("month")["count"].sum().reset_index(name="total")
+            df_counts = df_counts.merge(total_per_month, on="month")
+            df_counts["share"] = df_counts["count"] / df_counts["total"] * 100
+
+            # Créer le graphique en aires empilées (stacked area)
+            area_chart = alt.Chart(df_counts).mark_area().encode(
+                x=alt.X("month:T", title="Mois"),
+                y=alt.Y("share:Q", stack="normalize", title="Part (%)"),
+                color=alt.Color("category:N", title="Catégorie"),
+                tooltip=["month:T", "category:N", alt.Tooltip("share:Q", format=".2f")]
+            ).properties(
+                width=800,
+                height=400,
+                title="Part moyenne mensuelle des sous-catégories"
+            ).interactive()
+
+            st.altair_chart(area_chart, use_container_width=True)
 
 
             if st.session_state.selection == "Micro":
