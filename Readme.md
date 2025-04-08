@@ -59,8 +59,8 @@ The code was tested using '''Python 3.9.13'''
 2. Create a virtual environment:
 
 ```sh
-python3 -m venv baroclima
-source baroclima/bin/activate
+python3 -m venv baroclimat
+source baroclimat/bin/activate
 pip install -r requirements.txt
 ```
 

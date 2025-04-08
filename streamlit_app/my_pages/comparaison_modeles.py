@@ -84,7 +84,7 @@ def show():
                label='Base-Model', color=pastel_orange)
         # Barres pour le benchmark
         ax.bar(x + width*1.05, df_benchmark.loc[model, metrics], width,
-               label='Benchmark semi-supervisé', color=pastel_gray)
+               label='Ancien model (FastText)', color=pastel_gray)
         
         source = df_lora_best.loc[model, "source"] if "source" in df_lora_best.columns else f"Modèle {model}"
         ax.set_title(f'Comparaison des métriques pour {source}')

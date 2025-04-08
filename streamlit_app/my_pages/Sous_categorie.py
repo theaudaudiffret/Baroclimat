@@ -3,6 +3,8 @@ import pandas as pd
 import math
 import matplotlib.pyplot as plt
 import seaborn as sns
+import altair as alt
+
 
 def show():
     st.title("📊 De quel sujet a-t-on parlé sur TF1 et France 2 en 2024?")
@@ -54,6 +56,42 @@ def show():
             "comportement_consommateur",
             "reforestation"
         ]
+
+        cause_thematiques = {"gaz_effet_de_serre": "gaz_effet_de_serre",
+                            "agriculture_et_utilisation_du_sol": "agriculture_et_utilisation_du_sol",
+                            "peche_et_chasse": "peche_et_chasse",
+                            "intrants_chimique_pollution_plastique": "intrants_chimique_pollution_plastique",
+                            "surconsommation": "surconsommation",
+                            "deforestation": "deforestation"}
+
+
+
+        consequence_thematiques = {"catastrophes_naturelles":"catastrophes_naturelles",
+                                "rechauffement_climatique_canicule":"rechauffement_climatique_canicule",
+                                    "secheresse":"secheresse",
+                                    "couche_ozone":"couche_ozone",
+                                    "feu_foret":"feu_foret",
+                                    "tension_alim_famines":"tension_alim_famines",
+                                    "eau_potable":"eau_potable",
+                                    "hausse_niveau_mer_fonte_glace":"hausse_niveau_mer_fonte_glace",
+                                    "consequence_sociale":"consequence_sociale",
+                                    "acidification_ocean":"acidification_ocean",
+                                    "perte_biodiversite":"perte_biodiversite",
+                                    "pollution":"pollution"}
+
+        solution_thematiques = {"energies_renouvelables_et_nucleaires": "energies_renouvelables_et_nucleaires",
+                                "transport_decarbone": "transport_decarbone",
+                                "engagement_politique_et_entreprises": "engagement_politique_et_entreprises",
+                                "activisme_eco": "activisme_eco",
+                                "solution_innovante": "solution_innovante",
+                                "comportement_consommateur": "comportement_consommateur",
+                                "reforestation": "reforestation"}
+
+
+
+
+
+
     elif st.session_state.selection == "Macro":
         csv_path = "Macro_category/Inference/predictions_2024_Macro-lora-8B-1-cat.csv"
         categories = [
@@ -68,6 +106,7 @@ def show():
     if csv_path and categories:
         # Chemin vers le fichier CSV
         df = pd.read_csv(csv_path)
+        df["date"] = df["date"].str.split(" ").str[0]
 
         # Conversion de la colonne 'date' en datetime
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
@@ -144,141 +183,202 @@ def show():
         # ======================================================
         # 4. Pagination : Affichage de 100 lignes par page
         # ======================================================
-        rows_per_page = 100
-        total_rows = df_filtre.shape[0]
-        total_pages = max(math.ceil(total_rows / rows_per_page), 1)
-
-        st.markdown("## Tableau de données")
-        st.write(f"Nombre total de lignes filtrées : {total_rows}")
-
-        if "page" not in st.session_state:
-            st.session_state.page = 1
-
-        cols = st.columns([1, 2, 1])
-        with cols[0]:
-            if st.button("⬅️"):
-                if st.session_state.page > 1:
-                    st.session_state.page -= 1
-        with cols[1]:
-            st.markdown(f"<h5 style='text-align: center;'>Page {st.session_state.page} sur {total_pages}</h5>", unsafe_allow_html=True)
-        with cols[2]:
-            if st.button("➡️"):
-                if st.session_state.page < total_pages:
-                    st.session_state.page += 1
-
-        start_idx = (st.session_state.page - 1) * rows_per_page
-        end_idx = start_idx + rows_per_page
-        df_page = df_filtre.iloc[start_idx:end_idx]
-        st.dataframe(df_page)
-
-        # ======================================================
-        # 5. Répartition des catégories prédites
-        # ======================================================
-        st.markdown("## Répartition des catégories prédites")
-        if st.session_state.selection == "Micro":
-            # Concaténation des 3 colonnes pour Micro
-            all_preds = pd.concat([
-                df_filtre["prediction_label_1"],
-                df_filtre["prediction_label_2"],
-                df_filtre["prediction_label_3"]
-            ])
+        if df_filtre.empty:
+            st.write("Aucune donnée pour la catégorie sélectionnée.")
         else:
-            # Pour Macro, seule la colonne prediction_label_1 est utilisée
-            all_preds = df_filtre["prediction_label_1"]
-            
-        all_preds = all_preds[all_preds.isin(categories)]
-        cat_counts = all_preds.value_counts().sort_values(ascending=False)
-        pastel_palette = sns.color_palette("pastel", len(cat_counts))
+            rows_per_page = 100
+            total_rows = df_filtre.shape[0]
+            total_pages = max(math.ceil(total_rows / rows_per_page), 1)
 
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("### 📊 Histogramme vertical")
-            fig1, ax1 = plt.subplots(figsize=(6, 5))
-            sns.barplot(x=cat_counts.index, y=cat_counts.values, ax=ax1, palette=pastel_palette)
-            ax1.set_xlabel("Catégorie")
-            ax1.set_ylabel("Occurrences")
-            ax1.set_title("Occurrences par catégorie")
-            ax1.tick_params(axis='x', rotation=90)
-            st.pyplot(fig1)
-        with col2:
-            st.markdown("### 🥧 Camembert")
-            fig2, ax2 = plt.subplots(figsize=(7, 6))
-            total = cat_counts.sum()
-            percentages = (cat_counts / total * 100).round(1)
-            labels_with_percent = [f"{cat} ({pct}%)" for cat, pct in zip(cat_counts.index, percentages)]
-            wedges, _ = ax2.pie(
-                cat_counts.values,
-                startangle=90,
-                colors=sns.color_palette("pastel", len(cat_counts)),
-                wedgeprops=dict(width=0.6)
-            )
-            ax2.axis("equal")
-            ax2.set_title("Répartition des catégories")
-            ax2.legend(
-                wedges,
-                labels_with_percent,
-                title="Catégories",
-                loc="center left",
-                bbox_to_anchor=(1, 0.5),
-                fontsize="small"
-            )
-            st.pyplot(fig2)
-        
-        # ======================================================
-        # 6. Histogramme proportionnel par mois avec ordre et palette fixes
-        # ======================================================
-        st.markdown("## Répartition des sous-catégories mois par mois")
+            st.markdown("## Tableau de données")
+            st.write(f"Nombre total de lignes filtrées : {total_rows}")
 
-        # Slider pour sélectionner un mois (1 à 12)
-        selected_month_single = st.slider("Sélectionnez un mois", min_value=1, max_value=12, value=1, step=1)
-        selected_month_name = month_dict[selected_month_single]
-    
-        # Filtrer le DataFrame pour le mois sélectionné
-        df_month = df_filtre[df_filtre["mois"] == selected_month_name]
+            if "page" not in st.session_state:
+                st.session_state.page = 1
 
-        if df_month.empty:
-            st.write("Aucune donnée pour ce mois.")
-        else:
-            # Combiner les prédictions pour le mois sélectionné
+            cols = st.columns([1, 2, 1])
+            with cols[0]:
+                if st.button("⬅️"):
+                    if st.session_state.page > 1:
+                        st.session_state.page -= 1
+            with cols[1]:
+                st.markdown(f"<h5 style='text-align: center;'>Page {st.session_state.page} sur {total_pages}</h5>", unsafe_allow_html=True)
+            with cols[2]:
+                if st.button("➡️"):
+                    if st.session_state.page < total_pages:
+                        st.session_state.page += 1
+
+            start_idx = (st.session_state.page - 1) * rows_per_page
+            end_idx = start_idx + rows_per_page
+            df_page = df_filtre.iloc[start_idx:end_idx]
+            st.dataframe(df_page)
+
+            # ======================================================
+            # 5. Répartition des catégories prédites
+            # ======================================================
+            st.markdown("## Répartition des catégories prédites")
             if st.session_state.selection == "Micro":
-                all_preds_month = pd.concat([
-                    df_month["prediction_label_1"],
-                    df_month["prediction_label_2"],
-                    df_month["prediction_label_3"]
+                # Concaténation des 3 colonnes pour Micro
+                all_preds = pd.concat([
+                    df_filtre["prediction_label_1"],
+                    df_filtre["prediction_label_2"],
+                    df_filtre["prediction_label_3"]
                 ])
             else:
-                all_preds_month = df_month["prediction_label_1"]
+                # Pour Macro, seule la colonne prediction_label_1 est utilisée
+                all_preds = df_filtre["prediction_label_1"]
                 
-            # Ne conserver que les prédictions qui figurent dans la liste des catégories
-            all_preds_month = all_preds_month[all_preds_month.isin(categories)]
-            
-            total_preds = all_preds_month.shape[0]
-            if total_preds == 0:
-                st.write("Aucune prédiction valide pour ce mois.")
-            else:
-                # Définir un ordre fixe pour les catégories (ordre alphabétique ici, à adapter si nécessaire)
-                ordered_categories = sorted(categories)
-                
-                # Calculer le nombre d'occurrences par catégorie en réindexant pour avoir toutes les catégories
-                cat_counts_month = all_preds_month.value_counts().reindex(ordered_categories, fill_value=0)
-                proportions = cat_counts_month / total_preds * 100
+            all_preds = all_preds[all_preds.isin(categories)]
+            #cat_counts = all_preds.value_counts().sort_values(ascending=False)
+            cat_counts = all_preds.value_counts().reindex(sorted(categories), fill_value=0).sort_values(ascending=False)
 
-                # Création d'une palette de couleurs fixe pour chaque catégorie
-                palette = sns.color_palette("pastel", len(ordered_categories))
-                color_mapping = dict(zip(ordered_categories, palette))
-                colors = [color_mapping[cat] for cat in ordered_categories]
-                
-                # Création de l'histogramme
-                fig, ax = plt.subplots(figsize=(10, 6))
-                sns.barplot(
-                    x=ordered_categories, 
-                    y=proportions.values, 
-                    palette=colors, 
-                    ax=ax
+            pastel_palette = sns.color_palette("pastel", len(cat_counts))
+
+            col1, col2 = st.columns(2)
+            with col1:
+                fig1, ax1 = plt.subplots(figsize=(6, 5))
+                sns.barplot(x=cat_counts.index, y=cat_counts.values, ax=ax1, palette=pastel_palette)
+                ax1.set_xlabel("Catégorie")
+                ax1.set_ylabel("Occurrences")
+                ax1.set_title("Occurrences par catégorie")
+                ax1.tick_params(axis='x', rotation=90)
+                st.pyplot(fig1)
+            with col2:
+                fig2, ax2 = plt.subplots(figsize=(7, 6))
+                total = cat_counts.sum()
+                percentages = (cat_counts / total * 100).round(1)
+                labels_with_percent = [f"{cat} ({pct}%)" for cat, pct in zip(cat_counts.index, percentages)]
+                wedges, _ = ax2.pie(
+                    cat_counts.values,
+                    startangle=90,
+                    colors=sns.color_palette("pastel", len(cat_counts)),
+                    wedgeprops=dict(width=0.6)
                 )
-                ax.set_xlabel("Catégorie")
-                ax.set_ylabel("Pourcentage (%)")
-                ax.set_title(f"Proportion des sous-catégories en {month_dict[selected_month_single]}")
-                ax.tick_params(axis='x', rotation=90)
-                st.pyplot(fig)
+                ax2.axis("equal")
+                ax2.set_title("Répartition des catégories")
+                ax2.legend(
+                    wedges,
+                    labels_with_percent,
+                    title="Catégories",
+                    loc="center left",
+                    bbox_to_anchor=(1, 0.5),
+                    fontsize="small"
+                )
+                st.pyplot(fig2)
+            
+            # ======================================================
+            # 6. Histogramme proportionnel par mois avec ordre et palette fixes
+            # ======================================================
+            st.markdown("## Répartition des sous-catégories mois par mois")
 
+            # Slider pour sélectionner un mois (1 à 12)
+            selected_month_single = st.slider("Sélectionnez un mois", min_value=1, max_value=12, value=1, step=1)
+            selected_month_name = month_dict[selected_month_single]
+        
+            # Filtrer le DataFrame pour le mois sélectionné
+            df_month = df_filtre[df_filtre["mois"] == selected_month_name]
+
+            if df_month.empty:
+                st.write("Aucune donnée pour ce mois.")
+            else:
+                # Combiner les prédictions pour le mois sélectionné
+                if st.session_state.selection == "Micro":
+                    all_preds_month = pd.concat([
+                        df_month["prediction_label_1"],
+                        df_month["prediction_label_2"],
+                        df_month["prediction_label_3"]
+                    ])
+                else:
+                    all_preds_month = df_month["prediction_label_1"]
+                    
+                # Ne conserver que les prédictions qui figurent dans la liste des catégories
+                all_preds_month = all_preds_month[all_preds_month.isin(categories)]
+                
+                total_preds = all_preds_month.shape[0]
+                if total_preds == 0:
+                    st.write("Aucune prédiction valide pour ce mois.")
+                else:
+                    # Définir un ordre fixe pour les catégories (ordre alphabétique ici, à adapter si nécessaire)
+                    ordered_categories = sorted(categories)
+                    
+                    # Calculer le nombre d'occurrences par catégorie en réindexant pour avoir toutes les catégories
+                    cat_counts_month = all_preds_month.value_counts().reindex(ordered_categories, fill_value=0)
+                    proportions = cat_counts_month / total_preds * 100
+
+                    # Création d'une palette de couleurs fixe pour chaque catégorie
+                    palette = sns.color_palette("pastel", len(ordered_categories))
+                    color_mapping = dict(zip(ordered_categories, palette))
+                    colors = [color_mapping[cat] for cat in ordered_categories]
+                    
+                    # Création de l'histogramme
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    sns.barplot(
+                        x=ordered_categories, 
+                        y=proportions.values, 
+                        palette=colors, 
+                        ax=ax
+                    )
+                    ax.set_xlabel("Catégorie")
+                    ax.set_ylabel("Pourcentage (%)")
+                    ax.set_title(f"Proportion des sous-catégories en {month_dict[selected_month_single]}")
+                    ax.tick_params(axis='x', rotation=90)
+                    st.pyplot(fig)
+
+
+
+            if st.session_state.selection == "Micro":
+
+
+
+
+                # Convertir la date si ce n'est pas déjà fait
+                df_filtre["date"] = pd.to_datetime(df_filtre["date"])
+
+                # Extraire le mois sous forme "YYYY-MM"
+                df_filtre["mois"] = df_filtre["date"].dt.to_period("M").astype(str)
+
+                # Fonction qui renvoie les thématiques d'un article (sans doublon)
+                def get_thématiques_article(row):
+                    labels = [row["prediction_label_1"], row["prediction_label_2"], row["prediction_label_3"]]
+                    thématiques = set()
+                    for label in labels:
+                        if label in cause_thematiques:
+                            thématiques.add("cause")
+                        elif label in consequence_thematiques:
+                            thématiques.add("conséquence")
+                        elif label in solution_thematiques:
+                            thématiques.add("solution")
+                    return list(thématiques)
+
+                # Appliquer la fonction
+                df_filtre["thématiques_par_article"] = df_filtre.apply(get_thématiques_article, axis=1)
+
+                # Exploser pour avoir une ligne par thématique
+                df_exploded = df_filtre.explode("thématiques_par_article")
+
+                # Filtrer avec le multiselect
+                thematiques_options = ["cause", "conséquence", "solution"]
+                selected_thematiques = st.multiselect(
+                    "Sélectionnez les types de thématiques à visualiser",
+                    options=thematiques_options,
+                    default=thematiques_options
+                )
+
+                df_exploded = df_exploded[df_exploded["thématiques_par_article"].isin(selected_thematiques)]
+
+                # Grouper par mois et thématique
+                df_count = df_exploded.groupby(["mois", "thématiques_par_article"]).size().reset_index(name="Occurrences")
+
+                # Tracer le graphique
+                chart = alt.Chart(df_count).mark_bar().encode(
+                    x=alt.X("mois:N", title="Mois"),
+                    y=alt.Y("Occurrences:Q", title="Nombre d'articles"),
+                    color=alt.Color("thématiques_par_article:N", title="Thématique"),
+                    tooltip=["mois", "thématiques_par_article", "Occurrences"]
+                ).properties(
+                    width=700,
+                    height=400,
+                    title="Nombre d’articles par mois et par thématique"
+                )
+
+                st.altair_chart(chart, use_container_width=True)

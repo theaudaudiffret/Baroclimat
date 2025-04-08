@@ -15,7 +15,7 @@ def show():
 
     # 📥 Lecture du fichier
     try:
-        df = pd.read_csv("../data/2024_JT_TF1_F2.csv")
+        df = pd.read_csv("data/2024_JT_TF1_F2.csv")
     except FileNotFoundError:
         st.error("Fichier introuvable.")
         return
