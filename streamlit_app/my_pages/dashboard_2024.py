@@ -65,17 +65,6 @@ def show():
     # Calcul du ratio climat
     df_grouped['ratio'] = (df_grouped['articles_climat'] / df_grouped['total_articles']) * 100
 
-    # Affichage du graphique histogramme
-    st.subheader(title)
-
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.bar(df_grouped.index.astype('datetime64[ns]'), df_grouped['ratio'], color='skyblue', edgecolor='black')
-    ax.set_xlabel("Période")
-    ax.set_ylabel("Pourcentage d'articles Climat (%)")
-    ax.set_title(title, fontsize=14)
-    ax.set_ylim(0, 100)
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.xticks(rotation=45)
 
 
     #sur le modèle des anciens
@@ -121,19 +110,6 @@ def show():
     # climate_chart = climate_topic_dashboard_all(df_grouped).interactive()
     # st.altair_chart(climate_chart, use_container_width=True)
 
-    # Affichage premier
-    st.pyplot(fig)
-
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    df_grouped['ratio'].plot(ax=ax, color='skyblue', marker='o', linestyle='-', linewidth=2)
-    ax.set_xlabel('Période')
-    ax.set_ylabel("Pourcentage d'articles Climat (%)")
-    ax.set_ylim(0, 100)
-    ax.set_title(title)
-    ax.grid(True)
-    st.pyplot(fig)
-
     #affichage type ancien 
 
     df["year"] = df["date"].dt.year
@@ -157,14 +133,14 @@ def show():
 
     with col[0]:
         with st.container():
-            st.subheader("Nombre total de reportages TV diffusés la semaine dernière")
+            st.subheader("Nombre total de reportages TV (TF1 et France 2) diffusés sur l'année")
             df_week = df[df["date"] > today - datetime.timedelta(days=7)]
-            st.markdown(f"""<p class="big-font">{df_week.shape[0]}</p>""", unsafe_allow_html=True)
+            st.markdown(f"""<p class="big-font">{df.shape[0]}</p>""", unsafe_allow_html=True)
 
     with col[1]:
         with st.container():
-            st.subheader("Pourcentage d'articles climat la semaine dernière")
-            percentage_climate = df_week["label"].mean() * 100
+            st.subheader("Pourcentage d'articles catégorisés climat sur l'ensemble de l'année")
+            percentage_climate = df["label"].mean() * 100
             if percentage_climate > 10:  # percentage to diplay in green if above 10%
                 st.markdown(
                     f"""<p class="big-font" style="color: #228B22;">{percentage_climate:.2f} %</p>""",
@@ -178,7 +154,7 @@ def show():
 
     with col[2]:
         with st.container():
-            st.subheader("Evolution de la couverture médiatique du climat")
+            st.subheader("Evolution de la couverture médiatique du climat sur le dernier mois")
             df_month = df[df["date"] > today - datetime.timedelta(days=30)]
             evolution = (df_week["label"].mean() - df_month["label"].mean()) * 100
             if evolution > 0:
@@ -193,8 +169,8 @@ def show():
                 )
 
 
-    climate_chart = climate_topic_dashboard(df).interactive()
-    st.altair_chart(climate_chart, use_container_width=True)
+    # climate_chart = climate_topic_dashboard(df).interactive()
+    # st.altair_chart(climate_chart, use_container_width=True)
 
 
 
