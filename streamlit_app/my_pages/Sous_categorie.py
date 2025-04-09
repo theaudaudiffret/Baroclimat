@@ -16,6 +16,8 @@ def show():
     # Disposition en colonnes pour avoir deux boutons côte à côte
     col1, col2 = st.columns(2)
 
+    st.session_state.selection = "Micro"
+
     with col1:
         if st.button("Micro"):
             st.session_state.selection = "Micro"
@@ -32,16 +34,16 @@ def show():
         categories = [
             "gaz_effet_de_serre",
             "agriculture_et_utilisation_du_sol",
-            "peche_et_chasse",
+            "pêche_et_chasse_intensives", # "peche_et_chasse",
             "pollution",
             "deforestation",
             "surconsommation",
             "catastrophes_naturelles",
             "rechauffement_climatique_canicule",
             "secheresse",
-            "couche_ozone",
+            "couches_ozone",#"couche_ozone",
             "feu_foret",
-            "tension_alim_famines",
+            "tension_alimentaire_famines", #"tension_alim_famines",
             "eau_potable",
             "hausse_niveau_mer_fonte_glace",
             "consequence_sociale",
@@ -272,50 +274,61 @@ def show():
             # ======================================================
 
 
-            # Fusionner les trois colonnes de prédiction
-            df_long = pd.melt(
-                df_filtre,
-                id_vars=["date"],
-                value_vars=["prediction_label_1", "prediction_label_2", "prediction_label_3"],
-                var_name="prediction_rank",
-                value_name="category"
-            )
-
-            # Garder uniquement les catégories à visualiser
-            df_long = df_long[df_long["category"].isin(categories)]
-
-            # Extraire l'année et le mois comme nouvelle colonne "month"
-            df_long["month"] = df_long["date"].dt.to_period("M").dt.to_timestamp()
-
-            # Compter les occurrences par mois et catégorie
-            df_counts = (
-                df_long.groupby(["month", "category"])
-                .size()
-                .reset_index(name="count")
-            )
-
-            # Calculer le total mensuel pour chaque mois
-            total_per_month = df_counts.groupby("month")["count"].sum().reset_index(name="total")
-            df_counts = df_counts.merge(total_per_month, on="month")
-            df_counts["share"] = df_counts["count"] / df_counts["total"] * 100
-
-            # Créer le graphique en aires empilées (stacked area)
-            area_chart = alt.Chart(df_counts).mark_area().encode(
-                x=alt.X("month:T", title="Mois"),
-                y=alt.Y("share:Q", stack="normalize", title="Part (%)"),
-                color=alt.Color("category:N", title="Catégorie"),
-                tooltip=["month:T", "category:N", alt.Tooltip("share:Q", format=".2f")]
-            ).properties(
-                width=800,
-                height=400,
-                title="Part moyenne mensuelle des sous-catégories"
-            ).interactive()
-
-            st.altair_chart(area_chart, use_container_width=True)
 
 
             if st.session_state.selection == "Micro":
 
+
+                # Fusionner les colonnes de prédiction
+                df_long = pd.melt(
+                    df_filtre,
+                    id_vars=["date"],
+                    value_vars=["prediction_label_1", "prediction_label_2", "prediction_label_3"],
+                    var_name="prediction_rank",
+                    value_name="category"
+                )
+
+                # Extraire le mois (en transformant la date en début de mois)
+                df_long["month"] = df_long["date"].dt.to_period("M").dt.to_timestamp()
+                df_long["month_str"] = df_long["date"].dt.strftime("%b %Y")
+
+                # Liste des catégories uniques
+                all_categories = sorted(df_long["category"].dropna().unique())
+
+                # Sélecteur Streamlit pour choisir les catégories
+                selected_categories = st.multiselect(
+                    "Choisis les catégories à afficher",
+                    options=all_categories,
+                    default=all_categories[:3]
+                )
+
+                # Filtrer les données selon la sélection
+                df_cat = df_long[df_long["category"].isin(selected_categories)]
+
+                # Regrouper et compter les occurrences par mois et par catégorie
+                df_counts = (
+                    df_cat.groupby(["month_str", "category"])
+                    .size()
+                    .reset_index(name="count")
+                )
+
+                # Calcul dynamique de la largeur des barres
+                bar_width = max(5, int(50 / max(1, len(selected_categories))))  # Ajuste les bornes si besoin
+
+                # Configuration du graphique avec largeur adaptative
+                chart = alt.Chart(df_counts).mark_bar(size=bar_width).encode(
+                    x=alt.X("month_str:O", title="Mois"),
+                    xOffset=alt.XOffset("category:N"),
+                    y=alt.Y("count:Q", title="Nombre de prédictions"),
+                    color=alt.Color("category:N", title="Catégorie"),
+                    tooltip=["month_str:O", "category:N", "count:Q"]
+                ).properties(
+                    width=800,
+                    height=400,
+                    title="Occurrences mensuelles par catégorie (barres groupées)"
+                )
+
+                st.altair_chart(chart, use_container_width=True)
 
 
 
