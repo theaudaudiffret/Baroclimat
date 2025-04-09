@@ -28,7 +28,7 @@ def show():
     categories = None
 
     if st.session_state.selection == "Micro":
-        csv_path = "Micro_category/Inference/predictions_2024_Micro-lora-8B.csv"
+        csv_path = "Micro_category/Inference/predictions_2024_Micro-lora-8B-new.csv"
         categories = [
             "gaz_effet_de_serre",
             "agriculture_et_utilisation_du_sol",
