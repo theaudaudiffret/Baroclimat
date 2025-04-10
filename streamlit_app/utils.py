@@ -92,8 +92,8 @@ def climate_topic_dashboard(df):
         alt.Chart(df_groupby)
         .mark_line()
         .encode(
-            x=alt.X("date:T", axis=alt.Axis(format="%Y-%m")),
-            y=alt.Y("Proportion_selected:Q", axis=alt.Axis(format="%")),
+            x=alt.X("date:T", title="Date",axis=alt.Axis(format="%Y-%m")),
+            y=alt.Y("Proportion_selected:Q",title="Ratio d'articles climat (%)", axis=alt.Axis(format="%")),
             color=alt.Color(
                 "media:N", scale=alt.Scale(domain=list(media_colors.keys()), range=list(media_colors.values()))
             ),

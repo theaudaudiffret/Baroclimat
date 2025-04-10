@@ -84,7 +84,7 @@ def show():
     ).properties(
         width=700,
         height=400,
-        title="Évolution du ratio d'articles climat"
+        title="Évolution du ratio d'articles climat "
     )
 
     st.altair_chart(chart, use_container_width=True)
@@ -101,7 +101,7 @@ def show():
         .properties(
             width=700,
             height=400,
-            title="Histogramme du ratio d'articles climat par date"
+            title="Histogramme du ratio d'articles climat"
         )
     )
 
