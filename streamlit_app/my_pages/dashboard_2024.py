@@ -7,8 +7,7 @@ import datetime
 import altair as alt
 
 def show():
-    st.title("📊 Dashboard 2024")
-    st.write("Bienvenue sur la page du Dashboard.")
+    st.title("📊 Observatoire JT 2024")
     st.write("Cette page vous permet de visualiser les résultats de l'inférence sur le modèle 2024.")
     st.write("Vous pouvez explorer les pourcentages d'articles catégorisés 'Climat' par période (jour, semaine, mois) ainsi que filtrer les articles par date et média.")
 

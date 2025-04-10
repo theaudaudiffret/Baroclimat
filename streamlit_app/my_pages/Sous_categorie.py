@@ -7,8 +7,7 @@ import altair as alt
 
 
 def show():
-    st.title("📊 De quel sujet a-t-on parlé sur TF1 et France 2 en 2024?")
-    st.write("Bienvenue sur la page du Dashboard.")
+    st.title("📊 De quels sujets a-t-on parlé sur TF1 et France 2 en 2024?")
 
     # Initialisation de la sélection dans session_state
     if "selection" not in st.session_state:
