@@ -110,3 +110,52 @@ def show():
                      ax.legend()
                      st.pyplot(fig)
                      plt.close(fig)
+       st.subheader("Score énergétique des modèles testés")
+
+       data = {
+       "Modèle": [
+              "mistral large", "Deepseek-Qwen-7B", "small mistral", "mistral 8x7b",
+              "ministral 8b", "mistral 7b", "llama 3B", "Deepseek-Qwen-1.5B",
+              "falcon-7B", "chatgpt_ancien-3.5"
+       ],
+       "Taille": [123, 7, 24, 12.9, 8, 7, 3, 1.5, 7, 175],
+       "Energy": [1100, 17.5, 1100, 615.39, 20.87, 19.01, 7.5, 7.5, 15.88, 1100],
+       "Open Source": [False, True, False, True, True, True, True, True, True, False]
+       }
+
+       df = pd.DataFrame(data)
+       df = df[df["Taille"].notnull()].copy()
+
+       # Calque des points
+       points = alt.Chart(df).mark_circle().encode(
+       x=alt.X("Taille:Q", scale=alt.Scale(type='log'), title="Taille du modèle (log scale, en B)"),
+       y=alt.Y("Energy:Q", scale=alt.Scale(type='log'), title="AI Energy Score (log scale, Wh pour 1000 inférences)"),
+       color=alt.Color("Open Source:N",
+                     scale=alt.Scale(domain=[True, False], range=["green", "red"]),
+                     legend=alt.Legend(title="Open Source")),
+       size=alt.Size("Taille:Q",
+                     scale=alt.Scale(range=[50, 400]),
+                     legend=alt.Legend(title="Taille du modèle (B)")),
+       tooltip=["Modèle", "Taille", "Energy", "Open Source"]
+       )
+
+       # Calque des étiquettes (labels)
+       labels = alt.Chart(df).mark_text(
+       align='left',
+       baseline='middle',
+       dx=7,  # petit décalage en X pour éviter chevauchement
+       fontSize=11
+       ).encode(
+       x=alt.X("Taille:Q", scale=alt.Scale(type='log')),
+       y=alt.Y("Energy:Q", scale=alt.Scale(type='log')),
+       text="Modèle"
+       )
+
+       # Combinaison des deux calques
+       chart = (points + labels).properties(
+       title="Modèles IA : Taille vs Énergie (log-log, avec étiquettes visibles)",
+       width=850,
+       height=450
+       ).interactive()
+
+       st.altair_chart(chart)

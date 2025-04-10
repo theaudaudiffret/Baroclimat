@@ -2,7 +2,6 @@ import altair as alt
 import matplotlib as plt
 import numpy as np
 import pandas as pd
-import plotly.express as px
 
 def climate_topic_dashboard(df):
     """
