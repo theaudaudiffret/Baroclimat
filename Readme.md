@@ -32,10 +32,15 @@
 │── 📂 lora_distill_Qwen_1.5B_boost/   <-- Micro category model
 │── 📂 Macro_lora_8B/                  <-- Macro category model
 │
-📂 Prompting_notebooks/               
-📂 src/config/                        <-- Put your Hugging Face API key here
+📂 src/config/                        <-- Put your Hugging Face API and Azure key here
+│
+📂 streamlit_app/               <-- Contains our streamlit app to vizualise the results 
 │
 .gitignore
+│
+Prompting_mistral_micro_classif.ipynb  <-- our prompting results 
+│
+first_classif.ipynb  <-- Classify between climate and non climate
 │
 Readme.md
 │
@@ -52,7 +57,14 @@ The code was tested using '''Python 3.9.13'''
 {
     "huggingface": {
         "api_token": "XXX"
+    },
+    {
+
+    "azure": {
+        "AZURE_STORAGE_CONNECTION_STRING": "XXX",
     }
+
+    },
 }
 ```
 
@@ -64,16 +76,67 @@ source baroclimat/bin/activate
 pip install -r requirements.txt
 ```
 
-## Testing Your Trained Models with 25 Categories
 
-```sh
+## 🧠 News Classification Models
+
+This repository contains several models trained for news classification into thematic categories.
+
+## 📦 Available Models
+
+- **`models/lora-distill-llama-8b-new`**  
+  Trained on our newly labeled dataset:  
+  `data/Annotations_sous_thematiques_new.csv`
+
+- **`models/Macro-lora-8B`**  
+  Trained on macro-categories derived from the new annotations:  
+  `data/Annotations_macro_thematiques_new.csv`
+
+- **`models/lora-distill-llama-8b-boost`**  
+  Trained on the older annotation version:  
+  `data/annotation_sous_thematiques.csv`
+
+## 📰 Data
+
+- **`data/2024_JT_TF1_F2.csv`**  
+  Contains 2024 news bulletins that we classified and used in our Streamlit app.
+
+---
+
+## 🧪 Testing Your Trained Models
+
+### ➤ For 25 Categories (Micro-thematic)
+
+```bash
 python3 Micro_category/Inference.py
 ```
 
-## Testing Your Trained Models with 5 Categories
+### ➤ For 5 Categories (Macro-thematic)
 
-```sh
+```bash
+python3 Macro_category/Inference_macro_1_cat.py
+```
+
+---
+
+## 🏋️‍♂️ Training a Model
+
+You can launch training with the following scripts:
+
+```bash
+python3 Micro_category/Inference.py
+```
+
+```bash
 python3 Macro_category/Inference.py
 ```
 
+---
+
+## 🚀 Launching the Streamlit App
+
+To visualize results or interact with the classifier via a UI:
+
+```bash
+streamlit run streamlit_app/app.py
+```
 
